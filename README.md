@@ -5,9 +5,13 @@ A python wrapper for [TexShade](https://ctan.org/pkg/texshade?lang=en) sequence 
 ### On Linux
 
 
-### On Mac
-The easiest way seem to install the basic TeX distro
-http://www.tug.org/mactex/morepackages.html
+
+
+## Usage
+
+
+### Alternative installation notes
+TeX distro for Mac http://www.tug.org/mactex/morepackages.html
 and then add TeXShade via
 ```
 sudo tlmgr update --self
@@ -22,5 +26,3 @@ Via brew:
 brew install im
 brew install gs
 ```
-
-## Usage

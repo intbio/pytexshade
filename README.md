@@ -9,7 +9,7 @@ conda isntall -c intbio pytexshade
 
 ## Usage
 ### In Jupyter
-For Jupyter use see [example.ipynb](example.ipynb)
+For Jupyter use see [example.ipynb](example.ipynb) - THIS IS RECOMMENDED
 ### Stand alone
 
 ```

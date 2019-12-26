@@ -50,31 +50,35 @@ def seqfeat2shadefeat(msa,seqref=None,idseqref=True):
 
     return features
 
-def shade_aln2png(msa,filename='default',shading_modes=['similar'],features=[],title='',legend=True, logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=True,show_seq_length=True,funcgroups=None,rotate=False,threshold=[80,50],resperline=0,margins=None, density=150):
+def shade_aln2png(msa,filename='default',shading_modes=['similar'],features=[],title='',legend=True, logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=True,show_seq_length=True,funcgroups=None,rotate=False,threshold=[80,50],resperline=0,margins=None, density=150,debug=False):
     td=tempfile.TemporaryDirectory()
     TEMP_DIR=td.name
-    print("Created temporaty directory: ", TEMP_DIR)
+    if(debug):
+        print("Created temporaty directory: ", TEMP_DIR)
     intf=os.path.join(TEMP_DIR,'tempshade.pdf')
-    shade_aln2pdf(msa,intf,shading_modes,features,title,legend, logo,hideseqs,splitN,setends,ruler,show_seq_names,show_seq_length,funcgroups,threshold,resperline=resperline)
+    shade_aln2pdf(msa,intf,shading_modes,features,title,legend, logo,hideseqs,splitN,setends,ruler,show_seq_names,show_seq_length,funcgroups,threshold,resperline=resperline,debug=debug)
     #let's use imagemagic
     #margins - add on each side margins %
     if margins:
         m=margins
     else:
         m=0
-    print("Converting PDF to PNG")
+    if(debug):
+        print("Converting PDF to PNG")
     if rotate:
         cmd='convert -density %d '%density+intf+' -trim -bordercolor White -border %.3f%%x0%% -rotate -90 %s'%(m,filename if filename[-3:]=='png' else filename+'.png')
-        print(cmd)
+        if(debug):
+            print(cmd)
         os.system(cmd)
     else:
         cmd='convert -density %d '%density+intf+' -trim -bordercolor White -border %.3f%%x0%% %s'%(m,filename if filename[-3:]=='png' else filename+'.png')
-        print(cmd)
+        if(debug):
+            print(cmd)
         os.system(cmd)
     os.remove(intf)
 
 
-def shade_aln2pdf(msa,filename='default',shading_modes=['similar'],features=[],title='',legend=True, logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=True,show_seq_length=True,funcgroups=None,threshold=[80,50],resperline=0):
+def shade_aln2pdf(msa,filename='default',shading_modes=['similar'],features=[],title='',legend=True, logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=True,show_seq_length=True,funcgroups=None,threshold=[80,50],resperline=0,debug=False):
     """
 will convert msa to a shaded pdf.
 shading_modes: similar, ... see write_texshade code
@@ -96,7 +100,8 @@ funcgroup example fg="\\funcgroup{xxx}{CT}{White}{Green}{upper}{up} \\funcgroup{
 
     td=tempfile.TemporaryDirectory()
     TEMP_DIR=td.name
-    print("Created temporaty directory: ", TEMP_DIR)
+    if(debug):
+        print("Created temporaty directory: ", TEMP_DIR)
 
     ns='consensus'
     hideseqs_by_name=[]
@@ -111,8 +116,9 @@ funcgroup example fg="\\funcgroup{xxx}{CT}{White}{Green}{upper}{up} \\funcgroup{
     while ((a_len-(num-1)*splitN)<2):
         splitN=splitN+1
         num=int(a_len/splitN)+1
-    print("Chosen splitting parameters")
-    print(a_len, splitN)
+    if(debug):
+        print("Chosen splitting parameters")
+        print(a_len, splitN)
 
     ####iterate over blocks and create alignment fasta files
     for i in range(num):
@@ -191,12 +197,13 @@ funcgroup example fg="\\funcgroup{xxx}{CT}{White}{Green}{upper}{up} \\funcgroup{
     # command='pdflatex --file-line-error --synctex=1 -output-directory=%s --save-size=10000  %s/align.tex > /dev/null'%(TEMP_DIR,TEMP_DIR)
     command='tectonic %s/align.tex > /dev/null'%(TEMP_DIR)
 
-
-    print('Launcning Tectonic:')
-    print(command)
+    if(debug):
+        print('Launcning Tectonic:')
+        print(command)
     os.system(command)
     command='mv '+os.path.join(TEMP_DIR,'align.pdf')+' %s'%(filename if filename[-3:]=='pdf' else (filename+'.pdf'))
-    print(command)
+    if(debug):
+        print(command)
     os.system(command)
     # for i in range(num):
         # os.remove(os.path.join(TEMP_DIR,'alignment%d.fasta'%i))

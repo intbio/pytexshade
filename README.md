@@ -1,8 +1,15 @@
 # pytexshade
 A python wrapper for [TexShade](https://ctan.org/pkg/texshade?lang=en) sequence alignment shader
 
-## Installation
-### On Linux
+## Installation via conda
+```
+conda create --name pytexshade
+source activate pytexshade
+conda install -c conda-forge tectonic
+conda install -c conda-forge imagemagic
+conda isntall -c intbio pytexshade
+
+```
 
 
 

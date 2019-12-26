@@ -53,6 +53,9 @@ It will convert MultipleSequenceAlignment to a shaded image.
 funcgroup example fg="\\funcgroup{xxx}{CT}{White}{Green}{upper}{up} \\funcgroup{xxx}{GA}{White}{Blue}{upper}{up}"
 }
 
+## Debuging and common problems
+- In case of problems use the degub=True option. This will copy all the intermediate files in the debug folder, you can adjust and modify it.
+- If you see an error `TeX capacity exceeded, sorry [main memory size=5000000]` decrease slitN parameter. Or try to tweak your Latex compiler.
 
 ### Alternative installation notes
 TeX distro for Mac http://www.tug.org/mactex/morepackages.html

@@ -64,6 +64,10 @@ def shade_aln2png(msa,filename='default',shading_modes=['similar'],features=[],t
     else:
         m=0
     if(debug):
+        print("DEBUG: copying pdf in current folder for analysis")
+        cmd="mkdir -p debug && cp %s debug/tempshade.pdf"%intf
+        print(cmd)
+        os.system(cmd)
         print("Converting PDF to PNG")
     if rotate:
         cmd='convert -density %d '%density+intf+' -trim -bordercolor White -border %.3f%%x0%% -rotate -90 %s'%(m,filename if filename[-3:]=='png' else filename+'.png')
@@ -124,6 +128,11 @@ funcgroup example fg="\\funcgroup{xxx}{CT}{White}{Green}{upper}{up} \\funcgroup{
     for i in range(num):
         t_aln=msa[(i*splitN):((i+1)*splitN)]
         AlignIO.write(t_aln,open(os.path.join(TEMP_DIR,'alignment%d.fasta'%i),'w'), 'fasta')
+        if(debug):
+            print("DEBUG: copying fasta file in current folder for analysis")
+            cmd="mkdir -p debug && cp %s debug/alignment%d.fasta"%(os.path.join(TEMP_DIR,'alignment%d.fasta'%i),i)
+            print(cmd)
+            os.system(cmd)
     if resperline==0:
         res_per_line=len(msa[0])
     else:
@@ -156,6 +165,8 @@ funcgroup example fg="\\funcgroup{xxx}{CT}{White}{Green}{upper}{up} \\funcgroup{
     lmult=math.ceil(float(len(msa[0]))/float(res_per_line))
     ca_len=a_len*lmult
     h=((ca_len/30.*18 + (2.5 if legend else 0.0)) if (ca_len/30.*18 + (2.5 if legend else 0.0) <18.0) else 18)
+    if(logo):
+        h=h+1
     w=(22/200.*res_per_line+2.5)
 
     if title:
@@ -195,12 +206,19 @@ funcgroup example fg="\\funcgroup{xxx}{CT}{White}{Green}{upper}{up} \\funcgroup{
     a.close()
 
     # command='pdflatex --file-line-error --synctex=1 -output-directory=%s --save-size=10000  %s/align.tex > /dev/null'%(TEMP_DIR,TEMP_DIR)
-    command='tectonic %s/align.tex > /dev/null'%(TEMP_DIR)
+    command='tectonic %s/align.tex 2>&1'%(TEMP_DIR)
 
     if(debug):
+        print("DEBUG: copying tex file in current folder for analysis")
+        cmd="mkdir -p debug && cp %s/align.tex debug/align.tex"%TEMP_DIR
+        print(cmd)
+        os.system(cmd)
         print('Launcning Tectonic:')
+        
         print(command)
-    os.system(command)
+    out=os.popen(command).read()
+    if(debug):
+        print(out)
     command='mv '+os.path.join(TEMP_DIR,'align.pdf')+' %s'%(filename if filename[-3:]=='pdf' else (filename+'.pdf'))
     if(debug):
         print(command)
@@ -219,7 +237,7 @@ def write_texshade(file_handle,aln_fname,features,res_per_line=120,showlegend=Tr
         file_handle.write("""
     \\begin{texshade}{%s}
     \\residuesperline*{%d}
-    """%(aln_fname,res_per_line))
+    """%(aln_fname.split('/')[-1],res_per_line)) # we expect that tex file will be in the same dir as alignment files!!! hense split('/')
        
 
 
@@ -373,7 +391,7 @@ def write_texshade(file_handle,aln_fname,features,res_per_line=120,showlegend=Tr
         for a,i in zip(align,range(len(align))):
             # print a.id.replace('|',' | ')
             file_handle.write("""
-    \\nameseq{%d}{%s}"""%(i+1,a.id.replace('|',' | ')))
+    \\nameseq{%d}{%s}"""%(i+1,a.id.replace('|',' | ').replace('_','-')))
 
         file_handle.write(r"""
 

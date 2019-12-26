@@ -6,7 +6,7 @@ A python wrapper for [TexShade](https://ctan.org/pkg/texshade?lang=en) sequence 
 conda create --name pytexshade
 source activate pytexshade
 conda install -c conda-forge tectonic
-conda install -c conda-forge imagemagic
+conda install -c conda-forge imagemagick
 conda isntall -c intbio pytexshade
 
 ```

@@ -164,7 +164,7 @@ funcgroup example fg="\\funcgroup{xxx}{CT}{White}{Green}{upper}{up} \\funcgroup{
 
     lmult=math.ceil(float(len(msa[0]))/float(res_per_line))
     ca_len=a_len*lmult
-    h=((ca_len/30.*18 + (2.5 if legend else 0.0)) if (ca_len/30.*18 + (2.5 if legend else 0.0) <18.0) else 18)
+    h=((ca_len/30.*18 + (2.5 if legend else 0.0)) if (ca_len/30.*18 + (2.5 if legend else 0.0) <18.0) else 18)+1
     if(logo):
         h=h+1
     w=(22/200.*res_per_line+2.5)

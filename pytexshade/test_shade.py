@@ -36,6 +36,8 @@ def test_5z3l():
 # print path to all filenames.
 		for filename in filenames:
 			print(os.path.join(dirname, filename))
+	print(os.getcwd())
+	print(os.path.dirname(os.path.realpath(__file__)))
 
 	msa_dict = pickle.load( open(os.path.join(DATA_PATH,"5z3l_msa_dict.p"), "rb" ) )
 	features_dict = pickle.load( open(os.path.join(DATA_PATH,"5z3l_features_dict.p"), "rb" ) )

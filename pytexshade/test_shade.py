@@ -29,19 +29,19 @@ def test_shade_aln2png_two_seqs():
 def test_5z3l():
 	DATA_PATH = pkg_resources.resource_filename('pytexshade', 'data/')
 
-	for dirname, dirnames, filenames in os.walk('.'):
-# print path to all subdirectories first.
-		for subdirname in dirnames:
-			print(os.path.join(dirname, subdirname))
-# print path to all filenames.
-		for filename in filenames:
-			print(os.path.join(dirname, filename))
-	print(os.getcwd())
-	print(os.path.dirname(os.path.realpath(__file__)))
+# 	for dirname, dirnames, filenames in os.walk('.'):
+# # print path to all subdirectories first.
+# 		for subdirname in dirnames:
+# 			print(os.path.join(dirname, subdirname))
+# # print path to all filenames.
+# 		for filename in filenames:
+# 			print(os.path.join(dirname, filename))
+# 	print(os.getcwd())
+# 	print(os.path.dirname(os.path.realpath(__file__)))
 
 	msa_dict = pickle.load( open(os.path.join(DATA_PATH,"5z3l_msa_dict.p"), "rb" ) )
 	features_dict = pickle.load( open(os.path.join(DATA_PATH,"5z3l_features_dict.p"), "rb" ) )
-	for s in 'ABCDEFGH':
+	for s in 'ABCDEFGHO':
 		msa=msa_dict[s]
 		features=features_dict[s]
 		print("Testing chain %s in 5z3l test"%s)

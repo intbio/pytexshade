@@ -19,20 +19,9 @@ jobs:
  
 ###Testing block before release
  
-    - name: Set up Python 3.7
-      if: steps.check_ver_change.outputs.version_change
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.7
-    - name: Install dependencies
-      if: steps.check_ver_change.outputs.version_change
-      run: |
-        python -m pip install --upgrade pip
     - name: Test with pytest
-      if: steps.check_ver_change.outputs.version_change
-      run: |
-        pip install pytest
-        pytest       
+      uses: ./.github/actions/test
+
 ####End testing block
       
     - name: Create a tag from VERSION

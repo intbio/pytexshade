@@ -27,7 +27,7 @@ def test_shade_aln2png_two_seqs():
 	assert size>10000, "output png filesize too small, looks that nothing was produced"
 
 def test_5z3l():
-	DATA_PATH = pkg_resources.resource_filename('pytexshade', 'pytexshade/data/')
+	DATA_PATH = pkg_resources.resource_filename('pytexshade', 'data/')
 
 	for dirname, dirnames, filenames in os.walk('.'):
 # print path to all subdirectories first.

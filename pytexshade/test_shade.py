@@ -11,7 +11,7 @@ from io import StringIO
 import pkg_resources
 import pickle
 
-DATA_PATH = pkg_resources.resource_filename('pytexshade', 'pytexshade/data/')
+DATA_PATH = pkg_resources.resource_filename('pytexshade', 'data/')
 
 def test_shade_aln2png_two_seqs():
 	print("Testing a small two sequence alignment")

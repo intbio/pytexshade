@@ -1,5 +1,5 @@
 include AUTHORS.rst CHANGES.rst DESCRIPTION.md LICENSE
-include expkg/data/*
+include pytexshade/data/*
 
 global-include VERSION
 recursive-exclude docs *

@@ -20,6 +20,7 @@ jobs:
 ###Testing block before release
  
     - name: Test with pytest
+      if: steps.check_ver_change.outputs.version_change
       uses: ./.github/actions/test
 
 ####End testing block

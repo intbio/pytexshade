@@ -13,6 +13,14 @@ import pickle
 
 DATA_PATH = pkg_resources.resource_filename('pytexshade', 'pytexshade/data/')
 
+for dirname, dirnames, filenames in os.walk('.'):
+# print path to all subdirectories first.
+	for subdirname in dirnames:
+		print(os.path.join(dirname, subdirname))
+# print path to all filenames.
+	for filename in filenames:
+		print(os.path.join(dirname, filename))
+
 def test_shade_aln2png_two_seqs():
 	print("Testing a small two sequence alignment")
 	human_h2a_z_core=Seq('SRSQRAGLQFPVGRIHRHLKSRTTSHGRVGATAAVYSAAILEYLTAEVLELAGNASKDLKVKRITPRHLQLAIRGDEELDSLI-KATIAGGGVIPHIHKSLIG')

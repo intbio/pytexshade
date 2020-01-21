@@ -4,7 +4,7 @@ import os
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-version_file = open(os.path.join(here, 'pytexshade', 'VERSION'))
+version_file = open(os.path.join(here, 'VERSION'))
 version = version_file.read().strip()
 
 # Get the long description from the relevant file

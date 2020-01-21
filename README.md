@@ -73,3 +73,13 @@ Via brew:
 brew install im
 brew install gs
 ```
+
+
+## For developers 
+
+- Testing can be done as
+```
+git clone https://github.com/intbio/pytexshade.git
+docker run   --workdir "/wd" -v "$PWD/pytexshade:/wd" intbio/pytexshade_test pytest
+```
+See test_results folder for results.

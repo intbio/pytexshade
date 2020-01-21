@@ -105,7 +105,7 @@ def test_logo():
      show_seq_length=True #Show sequence length \
     )
 
-	size=os.path.getsize('test_results/logo.png'%s)
+	size=os.path.getsize('test_results/logo.png')
 	assert size>10000, "output png filesize too small, looks that nothing was produced"
 
 
@@ -136,7 +136,7 @@ def test_long_msa():
      show_seq_length=True #Show sequence length \
     )
 
-	size=os.path.getsize('test_results/large.png'%s)
+	size=os.path.getsize('test_results/large.png')
 	assert size>10000, "output png filesize too small, looks that nothing was produced"
 
 

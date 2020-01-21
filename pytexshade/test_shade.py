@@ -66,12 +66,12 @@ def test_5z3l():
 
 def test_logo():
 	#Prepare a Multiple Sequence Alignment in biopython
-human_h2a_z_core=Seq('SRSQRAGLQFPVGRIHRHLKSRTTSHGRVGATAAVYSAAILEYLTAEVLELAGNASKDLKVKRITPRHLQLAIRGDEELDSLI-KATIAGGGVIPHIHKSLIG')
-xenopus_h2a_core=Seq('TRSSRAGLQFPVGRVHRLLRKGNYAE-RVGAGAPVYLAAVLEYLTAEILELAGNAARDNKKTRIIPRHLQLAVRNDEELNKLLGRVTIAQGGVLPNIQSVLLP')
-msa=MultipleSeqAlignment([SeqRecord(xenopus_h2a_core,id='H2A',name='H2A'),SeqRecord(human_h2a_z_core,id='H2AZ',name='H2AZ')])
+	human_h2a_z_core=Seq('SRSQRAGLQFPVGRIHRHLKSRTTSHGRVGATAAVYSAAILEYLTAEVLELAGNASKDLKVKRITPRHLQLAIRGDEELDSLI-KATIAGGGVIPHIHKSLIG')
+	xenopus_h2a_core=Seq('TRSSRAGLQFPVGRVHRLLRKGNYAE-RVGAGAPVYLAAVLEYLTAEILELAGNAARDNKKTRIIPRHLQLAVRNDEELNKLLGRVTIAQGGVLPNIQSVLLP')
+	msa=MultipleSeqAlignment([SeqRecord(xenopus_h2a_core,id='H2A',name='H2A'),SeqRecord(human_h2a_z_core,id='H2AZ',name='H2AZ')])
 #We need to describe feautures
 #See also TexShade docs http://mirrors.mi.ras.ru/CTAN/macros/latex/contrib/texshade/texshade.pdf
-features=[
+	features=[
     {'style':'fill:$\\uparrow$', #Styles - all TexShade feature types 'helix','loop','-->','---','<--',',-,' AND also "frameblock", "shaderegion" or "shadeblock", see TexShade docs for more info\
      #'position':'top',# Position of feature annotation also 'bottom','ttop','bbottom', etc. if no - automatic'\
      #'seqref':1, #number of sequence for selections - default consensus\

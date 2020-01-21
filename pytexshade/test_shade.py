@@ -14,6 +14,7 @@ import pickle
 
 
 def test_shade_aln2png_two_seqs():
+	os.system('mkdir -p test_results')
 	print("Testing a small two sequence alignment")
 	human_h2a_z_core=Seq('SRSQRAGLQFPVGRIHRHLKSRTTSHGRVGATAAVYSAAILEYLTAEVLELAGNASKDLKVKRITPRHLQLAIRGDEELDSLI-KATIAGGGVIPHIHKSLIG')
 	xenopus_h2a_core=Seq('TRSSRAGLQFPVGRVHRLLRKGNYAE-RVGAGAPVYLAAVLEYLTAEILELAGNAARDNKKTRIIPRHLQLAVRNDEELNKLLGRVTIAQGGVLPNIQSVLLP')
@@ -22,8 +23,8 @@ def test_shade_aln2png_two_seqs():
 	# features=get_hist_ss_in_aln_for_shade(msa,below=True)
 	features=[{'style':'fill:$\\uparrow$','sel':[5,10],'text':'test'}]
 	print(features)
-	shade_aln2png(msa,filename='default',shading_modes=['charge_functional'], legend=False, features=features,title='',logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=False,show_seq_length=False)
-	size=os.path.getsize('default.png')
+	shade_aln2png(msa,filename='test_results/2seqs.png',shading_modes=['charge_functional'], legend=False, features=features,title='',logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=False,show_seq_length=False)
+	size=os.path.getsize('test_results/2seqs.png')
 	assert size>10000, "output png filesize too small, looks that nothing was produced"
 
 def test_5z3l():
@@ -38,15 +39,16 @@ def test_5z3l():
 # 			print(os.path.join(dirname, filename))
 # 	print(os.getcwd())
 # 	print(os.path.dirname(os.path.realpath(__file__)))
-
+	os.system('mkdir -p test_results')
 	msa_dict = pickle.load( open(os.path.join(DATA_PATH,"5z3l_msa_dict.p"), "rb" ) )
 	features_dict = pickle.load( open(os.path.join(DATA_PATH,"5z3l_features_dict.p"), "rb" ) )
+
 	for s in 'ABCDEFGHO':
 		msa=msa_dict[s]
 		features=features_dict[s]
 		print("Testing chain %s in 5z3l test"%s)
 		shade_aln2png(msa,\
- filename='default',\
+ filename='test_results/5z3l_%s.png'%s,\
  shading_modes=['similar'],# list of shading modes according to TexShade, supported are "similar", "hydropathy_functional", "chemical_functional", "structure_functional", "charge_functional", "diverse"\
  legend=False,features=features,title='',\
  logo=False, #SeqLogo \
@@ -58,5 +60,5 @@ def test_5z3l():
  funcgroups=None, # Hilight functional groups, Tex code should be inserted example funcgroups="\\funcgroup{xxx}{CT}{White}{Green}{upper}{up} \\funcgroup{yyy}{GA}{White}{Blue}{upper}{up}" \
  show_seq_length=False #Show sequence length \
 )
-		size=os.path.getsize('default.png')
+		size=os.path.getsize('test_results/5z3l_%s.png'%s)
 		assert size>10000, "output png filesize too small, looks that nothing was produced"

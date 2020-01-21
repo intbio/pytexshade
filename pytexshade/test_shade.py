@@ -11,15 +11,7 @@ from io import StringIO
 import pkg_resources
 import pickle
 
-DATA_PATH = pkg_resources.resource_filename('pytexshade', 'pytexshade/data/')
 
-for dirname, dirnames, filenames in os.walk('.'):
-# print path to all subdirectories first.
-	for subdirname in dirnames:
-		print(os.path.join(dirname, subdirname))
-# print path to all filenames.
-	for filename in filenames:
-		print(os.path.join(dirname, filename))
 
 def test_shade_aln2png_two_seqs():
 	print("Testing a small two sequence alignment")
@@ -35,6 +27,16 @@ def test_shade_aln2png_two_seqs():
 	assert size>10000, "output png filesize too small, looks that nothing was produced"
 
 def test_5z3l():
+	DATA_PATH = pkg_resources.resource_filename('pytexshade', 'pytexshade/data/')
+
+	for dirname, dirnames, filenames in os.walk('.'):
+# print path to all subdirectories first.
+		for subdirname in dirnames:
+			print(os.path.join(dirname, subdirname))
+# print path to all filenames.
+		for filename in filenames:
+			print(os.path.join(dirname, filename))
+
 	msa_dict = pickle.load( open(os.path.join(DATA_PATH,"5z3l_msa_dict.p"), "rb" ) )
 	features_dict = pickle.load( open(os.path.join(DATA_PATH,"5z3l_features_dict.p"), "rb" ) )
 	for s in 'ABCDEFGH':

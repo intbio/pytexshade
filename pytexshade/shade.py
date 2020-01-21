@@ -95,7 +95,7 @@ features - a list of dictionaries:
 'text':'text'
 'color':'Red' this is for frame block
 'thickness':1.5 -1.5pt also for frameblock
-'rescol':'Black' this is for \shaderegion{ seqref  }{ selection }{ res.col. }{ shad.col. }
+'rescol':'Black' this is for \\shaderegion{ seqref  }{ selection }{ res.col. }{ shad.col. }
 'shadcol':'Green' - the same
 funcgroup example fg="\\funcgroup{xxx}{CT}{White}{Green}{upper}{up} \\funcgroup{xxx}{GA}{White}{Blue}{upper}{up}"
 }

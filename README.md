@@ -1,6 +1,6 @@
 # pytexshade
 A python wrapper for [TexShade](https://ctan.org/pkg/texshade?lang=en) sequence alignment shader
-
+![](https://github.com/intbio/pypkg_example/workflows/Testing/badge.svg)
 ## Installation via conda
 ```
 conda isntall -c intbio -c conda-forge -c bioconda pytexshade

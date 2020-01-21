@@ -18,5 +18,5 @@ def test_shade_aln2png():
 	features=[{'style':'fill:$\\uparrow$','sel':[5,10],'text':'test'}]
 	print(features)
 	shade_aln2png(msa,filename='default',shading_modes=['charge_functional'], legend=False, features=features,title='',logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=False,show_seq_length=False)
-    size=os.path.getsize('default.png')
-    assert size>10000, "output png filesize too small, looks that nothing was produced"
+	size=os.path.getsize('default.png')
+	assert size>10000, "output png filesize too small, looks that nothing was produced"

@@ -24,25 +24,33 @@ from Bio import AlignIO
 from io import StringIO
 
 
-def seqfeat2shadefeat(msa,seqref=None,idseqref=True):
+def seqfeat2shadefeat(msa,seqref=None,idseqref=True, debug=False):
     """
-    converts SeqFeature records for every sequence in msa to our style feature list
+    converts SeqFeature records from genbank for every sequence in msa to our style feature list
     """
+    gb_feat_dict_conv={'sheet':'-->'}
     features=[]
     #In texshade [1,1] will be colored as one residue. this is different from biopython where [1,1] selects nothing!
     for m,i in zip(msa,range(len(msa))):
+        if(debug):
+            print(m)
         for f in m.features:
+            if(debug):
+                print(f)
             if seqref:
                 sr=seqref
             elif idseqref:
                 sr=m.id
             else:
                 sr=i+1
-
+            if f.type=='SecStr':
+                features.append({'style':f.qualifiers['sec_str_type'][0],'seqref':sr,'sel':[f.location.start,f.location.end-1]})   
             if f.type=='motif':
                 features.append({'style':'shaderegion','seqref':sr,'sel':[f.location.start,f.location.end-1],'shadcol':f.qualifiers['color']})
             if f.type=='domain':
                 features.append({'style':'shaderegion','seqref':sr,'sel':[f.location.start,f.location.end-1],'shadcol':f.qualifiers['color']})
+            if f.type=='Region':
+                features.append({'style':'---','seqref':sr,'sel':[f.location.start,f.location.end-1],'color':'black','text':f.qualifiers['region_name'][0],'position':'bottom'})
             if f.type=='frameblock':
                 features.append({'style':'frameblock','seqref':sr,'sel':[f.location.start,f.location.end-1],'color':f.qualifiers['color']})
             if f.type=='---':
@@ -50,13 +58,13 @@ def seqfeat2shadefeat(msa,seqref=None,idseqref=True):
 
     return features
 
-def shade_aln2png(msa,filename='default',shading_modes=['similar'],features=[],title='',legend=True, logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=True,show_seq_length=True,funcgroups=None,rotate=False,threshold=[80,50],resperline=0,margins=None, density=150,debug=False):
+def shade_aln2png(msa,filename='default',shading_modes=['similar'],features=[],title='',legend=True, logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=True,show_seq_length=True,funcgroups=None,rotate=False,threshold=[80,50],resperline=0,margins=None, density=150,debug=False,startnumber=1):
     td=tempfile.TemporaryDirectory()
     TEMP_DIR=td.name
     if(debug):
         print("Created temporaty directory: ", TEMP_DIR)
     intf=os.path.join(TEMP_DIR,'tempshade.pdf')
-    shade_aln2pdf(msa,intf,shading_modes,features,title,legend, logo,hideseqs,splitN,setends,ruler,show_seq_names,show_seq_length,funcgroups,threshold,resperline=resperline,debug=debug)
+    shade_aln2pdf(msa,intf,shading_modes,features,title,legend, logo,hideseqs,splitN,setends,ruler,show_seq_names,show_seq_length,funcgroups,threshold,resperline=resperline,debug=debug,startnumber=startnumber)
     #let's use imagemagic
     #margins - add on each side margins %
     if margins:
@@ -82,7 +90,7 @@ def shade_aln2png(msa,filename='default',shading_modes=['similar'],features=[],t
     os.remove(intf)
 
 
-def shade_aln2pdf(msa,filename='default',shading_modes=['similar'],features=[],title='',legend=True, logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=True,show_seq_length=True,funcgroups=None,threshold=[80,50],resperline=0,debug=False):
+def shade_aln2pdf(msa,filename='default',shading_modes=['similar'],features=[],title='',legend=True, logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=True,show_seq_length=True,funcgroups=None,threshold=[80,50],resperline=0,debug=False,startnumber=1):
     """
 will convert msa to a shaded pdf.
 shading_modes: similar, ... see write_texshade code
@@ -91,6 +99,8 @@ features - a list of dictionaries:
 + frameblock + shaderegion + shadeblock
 'position':'top','bottom','ttop','bbottom', etc. if no - automatic
 'seqref':number of sequence for selection - default consensus
+'setends':  analougs to setends command in TexShade - set the part of sequence to display - numbering as in TexShade, currently this is buggy in TexShade.
+'startnumber' - texshade starnumber parameter in \\stratnumber of \\setends - currently is also buggy.
 'sel':[begin,end] - region selection, this is in 0 based numbering (as in msa - we override here the TexShade 1-based numbering)
 'text':'text'
 'color':'Red' this is for frame block
@@ -98,6 +108,7 @@ features - a list of dictionaries:
 'rescol':'Black' this is for \\shaderegion{ seqref  }{ selection }{ res.col. }{ shad.col. }
 'shadcol':'Green' - the same
 funcgroup example fg="\\funcgroup{xxx}{CT}{White}{Green}{upper}{up} \\funcgroup{xxx}{GA}{White}{Blue}{upper}{up}"
+startnumber - bump the starting number for ruler by startnumber-1
 }
 
     """
@@ -124,6 +135,14 @@ funcgroup example fg="\\funcgroup{xxx}{CT}{White}{Green}{upper}{up} \\funcgroup{
         print("Chosen splitting parameters")
         print(a_len, splitN)
 
+    ### rename any seqs with _ to -
+    for i in range(len(msa)):
+        if(msa[i].id[0].isdigit()):
+            raise Exception('Tex cannot handle sequence ids starting with a number, offending id is %s'%msa[i].id)
+        msa[i].id=msa[i].id.replace('_','-')
+        msa[i].name=msa[i].name.replace('_','-')
+
+
     ####iterate over blocks and create alignment fasta files
     for i in range(num):
         t_aln=msa[(i*splitN):((i+1)*splitN)]
@@ -141,19 +160,20 @@ funcgroup example fg="\\funcgroup{xxx}{CT}{White}{Green}{upper}{up} \\funcgroup{
     #prepare feature section
 
     #alias dict
-    aliasf={'alpha':'helix','beta':'-->','domain':'loop'}
+    aliasf={'alpha':'helix','beta':'-->','sheet':'-->','domain':'loop'}
 
 
     features_dict={}
     for i in features:
-        sr=str(i.get('seqref','consensus'))
+        sr=str(i.get('seqref','consensus')).replace('_','-')
         if(i['style']=='block' or i['style']=='frameblock'):
             features_dict[sr]=features_dict.get(sr,'')+"\\frameblock{%s}{%d..%d}{%s[%.1fpt]}"%(sr,i['sel'][0]+1,i['sel'][1]+1,i.get('color','Red'),i.get('thickness',1.5))
         elif(i['style']=='shaderegion' or i['style']=='shadeblock'):
             features_dict[sr]=features_dict.get(sr,'')+"\\%s{%s}{%d..%d}{%s}{%s}"%(i['style'],sr,i['sel'][0]+1,i['sel'][1]+1,i.get('rescol','Black'),i.get('shadcol','Green'))
         else:
             features_dict[sr]=features_dict.get(sr,'')+"\\feature{%s}{%s}{%d..%d}{%s}{%s}"%(i.get('position','top'),sr,i['sel'][0]+1,i['sel'][1]+1,aliasf.get(i.get('style','loop'),i.get('style','loop')),i.get('text','').replace('_','-'))
-            
+    if(debug):
+        print(features_dict)
     a=open(os.path.join(TEMP_DIR,'align.tex'),'w')
 
     a.write(r"""\documentclass[11pt,landscape]{article}
@@ -164,7 +184,7 @@ funcgroup example fg="\\funcgroup{xxx}{CT}{White}{Green}{upper}{up} \\funcgroup{
 
     lmult=math.ceil(float(len(msa[0]))/float(res_per_line))
     ca_len=a_len*lmult
-    h=((ca_len/30.*18 + (2.5 if legend else 0.0)) if (ca_len/30.*18 + (2.5 if legend else 0.0) <18.0) else 18)+1
+    h=((ca_len/30.*25 + (2.5 if legend else 0.0)) if (ca_len/30.*25 + (2.5 if legend else 0.0) <25.0) else 25)+1
     if(logo):
         h=h+1
     w=(22/200.*res_per_line+2.5)
@@ -192,14 +212,14 @@ funcgroup example fg="\\funcgroup{xxx}{CT}{White}{Green}{upper}{up} \\funcgroup{
         for s,ns in zip(msa[(i*splitN):((i+1)*splitN)],range((i*splitN),((i+1)*splitN))):
             features_code+=features_dict.get(s.id,'')
             features_code+=features_dict.get(str(ns+1),'')
-        write_texshade(a,os.path.join(TEMP_DIR,'alignment%d.fasta'%i) , features_code, res_per_line,False,shading_modes,logo,hideseqs,setends,ruler,numbering_seq='consensus',hide_ns=False,show_seq_names=show_seq_names,show_seq_length=show_seq_length,hideseqs_by_name=hideseqs_by_name,funcgroups=funcgroups,threshold=threshold)
+        write_texshade(a,os.path.join(TEMP_DIR,'alignment%d.fasta'%i) , features_code, res_per_line,False,shading_modes,logo,hideseqs,setends,ruler,numbering_seq='consensus',hide_ns=False,show_seq_names=show_seq_names,show_seq_length=show_seq_length,hideseqs_by_name=hideseqs_by_name,funcgroups=funcgroups,threshold=threshold,startnumber=startnumber)
     
     i=num-1
     features_code=features_dict.get('consensus','')
     for s,ns in zip(msa[(i*splitN):((i+1)*splitN)],range((i*splitN),((i+1)*splitN))):
         features_code+=features_dict.get(s.id,'')
         features_code+=features_dict.get(str(ns+1),'')
-    write_texshade(a,os.path.join(TEMP_DIR,'alignment%d.fasta'%(num-1)) , features_code, res_per_line,legend,shading_modes,logo,hideseqs,setends,ruler,numbering_seq='consensus',hide_ns=False,show_seq_names=show_seq_names,show_seq_length=show_seq_length,hideseqs_by_name=hideseqs_by_name,funcgroups=funcgroups,threshold=threshold)
+    write_texshade(a,os.path.join(TEMP_DIR,'alignment%d.fasta'%(num-1)) , features_code, res_per_line,legend,shading_modes,logo,hideseqs,setends,ruler,numbering_seq='consensus',hide_ns=False,show_seq_names=show_seq_names,show_seq_length=show_seq_length,hideseqs_by_name=hideseqs_by_name,funcgroups=funcgroups,threshold=threshold,startnumber=startnumber)
 
     a.write(r"""
 \end{document} """)
@@ -230,13 +250,18 @@ funcgroup example fg="\\funcgroup{xxx}{CT}{White}{Green}{upper}{up} \\funcgroup{
 
 
 
-def write_texshade(file_handle,aln_fname,features,res_per_line=120,showlegend=True,shading_modes=['similar'],logo=False,hideseqs=False,setends=[],ruler=False,numbering_seq='consensus',hide_ns=False,show_seq_names=True,show_seq_length=True,hideseqs_by_name=[],funcgroups=None,threshold=[80,50]):
-
+def write_texshade(file_handle,aln_fname,features,res_per_line=120,showlegend=True,shading_modes=['similar'],logo=False,hideseqs=False,setends=[],ruler=False,numbering_seq='consensus',hide_ns=False,show_seq_names=True,show_seq_length=True,hideseqs_by_name=[],funcgroups=None,threshold=[80,50],startnumber=1):
+    if((not setends) and (startnumber!=1)):
+        raise Exception("With startnumber not equal 1, pls, define setends manually!")
+    if(setends and (startnumber!=1)):
+        startnumber=startnumber+1 #There is some bug in TexShade currently, I think.
+        
     for shading in shading_modes:
         shading=str(shading)
         file_handle.write("""
     \\begin{texshade}{%s}
     \\residuesperline*{%d}
+  %% \\allowzero
     """%(aln_fname.split('/')[-1],res_per_line)) # we expect that tex file will be in the same dir as alignment files!!! hense split('/')
        
 
@@ -247,14 +272,26 @@ def write_texshade(file_handle,aln_fname,features,res_per_line=120,showlegend=Tr
     """)
         #a very dirty hack
         if(setends):
-            if(numbering_seq=='consensus'):
-                file_handle.write("""
-    \\setends[%d]{%s}{%d..%d}
-    """%(setends[0]+1,numbering_seq,setends[0]+setends[0],setends[1]+setends[0]+setends[0]-1))
-            else:
-                    file_handle.write("""
-    \\setends{%s}{%d..%d}
-    """%(numbering_seq,setends[0],setends[1]))
+            file_handle.write("""
+     \\setends[%d]{%s}{%d..%d}
+     """%(startnumber,numbering_seq,setends[0],setends[1]))
+                    
+            
+# I have no ideas why whas that needed . @molsim 22 Jan 2020            
+#             if(numbering_seq=='consensus'):
+#                 file_handle.write("""
+#     \\setends[%d]{%s}{%d..%d}
+#     """%(setends[0]+startnumber,numbering_seq,setends[0]+setends[0],setends[1]+setends[0]+setends[0]-1))
+#             else:
+#                     file_handle.write("""
+#     \\setends[%d]{%s}{%d..%d}
+#     """%(startnumber,numbering_seq,setends[0],setends[1]))
+                    
+                    
+        else:
+            file_handle.write("""
+    \\startnumber{%s}{%d}
+    """%(numbering_seq,startnumber))
            
         if(ruler):
             if(ruler=='bottom'):

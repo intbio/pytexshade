@@ -3,7 +3,7 @@ A python wrapper for [TexShade](https://ctan.org/pkg/texshade?lang=en) sequence 
 ![](https://github.com/intbio/pytexshade/workflows/Testing/badge.svg)
 ## Installation via conda
 ```
-conda isntall -c intbio -c conda-forge -c bioconda pytexshade
+conda install -c intbio -c conda-forge -c bioconda pytexshade
 ```
 
 

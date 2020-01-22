@@ -184,7 +184,7 @@ startnumber - bump the starting number for ruler by startnumber-1
 
     lmult=math.ceil(float(len(msa[0]))/float(res_per_line))
     ca_len=a_len*lmult
-    h=((ca_len/30.*25 + (2.5 if legend else 0.0)) if (ca_len/30.*25 + (2.5 if legend else 0.0) <25.0) else 25)+1
+    h=((ca_len/30.*25 + (2.5 if legend else 0.0)) if (ca_len/30.*25 + (2.5 if legend else 0.0) <25.0) else 25)+4
     if(logo):
         h=h+1
     w=(22/200.*res_per_line+2.5)

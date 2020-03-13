@@ -106,10 +106,12 @@ features - a list of dictionaries:
 'color':'Red' this is for frame block
 'thickness':1.5 -1.5pt also for frameblock
 'rescol':'Black' this is for \\shaderegion{ seqref  }{ selection }{ res.col. }{ shad.col. }
-'shadcol':'Green' - the same
+'shadcol':'Green' - the same}
+ruler - show numbers every 10 residues. Can be True - show on top, or 'bottom' - show below.
 funcgroup example fg="\\funcgroup{xxx}{CT}{White}{Green}{upper}{up} \\funcgroup{xxx}{GA}{White}{Blue}{upper}{up}"
-startnumber - bump the starting number for ruler by startnumber-1
-}
+resperline - number of residues per line, if 0 - then equal to the length of the sequence.
+startnumber - hike the starting number for ruler by startnumber-1
+
 
     """
 

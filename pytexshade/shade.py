@@ -24,7 +24,7 @@ from Bio import AlignIO
 from io import StringIO
 
 
-def seqfeat2shadefeat(msa,seqref=None,idseqref=True, debug=False):
+def seqfeat2shadefeat(msa,seqref=None,idseqref=True, feature_types=['all'], debug=False):
     """
     converts SeqFeature records from genbank for every sequence in msa to our style feature list
     """
@@ -32,6 +32,10 @@ def seqfeat2shadefeat(msa,seqref=None,idseqref=True, debug=False):
     features=[]
     #In texshade [1,1] will be colored as one residue. this is different from biopython where [1,1] selects nothing!
     for m,i in zip(msa,range(len(msa))):
+        seqlen=len(msa[0])
+        #create a feature overlap string
+        fos='0'*seqlen
+        overlap=0
         if(debug):
             print(m)
         for f in m.features:
@@ -43,14 +47,21 @@ def seqfeat2shadefeat(msa,seqref=None,idseqref=True, debug=False):
                 sr=m.id
             else:
                 sr=i+1
-            if f.type=='SecStr':
+            if (f.type=='SecStr') and (('SecStr' in feature_types) or ('all' in feature_types)):
                 features.append({'style':f.qualifiers['sec_str_type'][0],'seqref':sr,'sel':[f.location.start,f.location.end-1]})   
-            if f.type=='motif':
+            if f.type=='motif' and (('motif' in feature_types) or ('all' in feature_types)):
                 features.append({'style':'shaderegion','seqref':sr,'sel':[f.location.start,f.location.end-1],'shadcol':f.qualifiers['color']})
-            if f.type=='domain':
+            if f.type=='domain' and (('domain' in feature_types) or ('all' in feature_types)):
                 features.append({'style':'shaderegion','seqref':sr,'sel':[f.location.start,f.location.end-1],'shadcol':f.qualifiers['color']})
-            if f.type=='Region':
-                features.append({'style':'---','seqref':sr,'sel':[f.location.start,f.location.end-1],'color':'black','text':f.qualifiers['region_name'][0],'position':'bottom'})
+            if f.type=='Region' and (('Region' in feature_types) or ('all' in feature_types)):
+                
+                for fi in range(f.location.start,f.location.end):
+                    if fos[fi]:
+                        overlap=overlap+1
+                        break
+                    else:
+                        fos[fi]=1
+                features.append({'style':'---','seqref':sr,'sel':[f.location.start,f.location.end-1],'color':'black','text':f.qualifiers['region_name'][0],'position':'b'*overlap+'bottom'})
             if f.type=='frameblock':
                 features.append({'style':'frameblock','seqref':sr,'sel':[f.location.start,f.location.end-1],'color':f.qualifiers['color']})
             if f.type=='---':
@@ -99,9 +110,7 @@ features - a list of dictionaries:
 + frameblock + shaderegion + shadeblock
 'position':'top','bottom','ttop','bbottom', etc. if no - automatic
 'seqref':number of sequence for selection - default consensus
-'setends':  analougs to setends command in TexShade - set the part of sequence to display - numbering as in TexShade, currently this is buggy in TexShade.
-'startnumber' - texshade starnumber parameter in \\stratnumber of \\setends - currently is also buggy.
-'sel':[begin,end] - region selection, this is in 0 based numbering (as in msa - we override here the TexShade 1-based numbering)
+'sel':[begin,end] - region selection, this is in 0 based numbering (as in msa - we override here the TexShade 1-based numbering). However (!) the end is also included into the feature (not like in biopython and python arrays) - this remains as in TexShade convention!
 'text':'text'
 'color':'Red' this is for frame block
 'thickness':1.5 -1.5pt also for frameblock
@@ -110,8 +119,8 @@ features - a list of dictionaries:
 ruler - show numbers every 10 residues. Can be True - show on top, or 'bottom' - show below.
 funcgroup example fg="\\funcgroup{xxx}{CT}{White}{Green}{upper}{up} \\funcgroup{xxx}{GA}{White}{Blue}{upper}{up}"
 resperline - number of residues per line, if 0 - then equal to the length of the sequence.
-startnumber - hike the starting number for ruler by startnumber-1
-
+'setends':  analougs to setends command in TexShade - set the part of sequence to display - numbering as in TexShade, currently this is buggy in TexShade.
+'startnumber' - texshade starnumber parameter in \\stratnumber of \\setends - currently is also buggy. If you need the sequence numbering to start from other than 1, test different options and see the result.
 
     """
 

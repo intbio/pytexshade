@@ -24,7 +24,7 @@ from Bio import AlignIO
 from io import StringIO
 
 
-def seqfeat2shadefeat(msa,seqref=None,idseqref=True, feature_types=['all'], debug=False):
+def seqfeat2shadefeat(msa,seqref=None,idseqref=True, feature_types=['all'],force_feature_pos=None, debug=False):
     """
     converts SeqFeature records from genbank for every sequence in msa to our style feature list
     """
@@ -48,7 +48,7 @@ def seqfeat2shadefeat(msa,seqref=None,idseqref=True, feature_types=['all'], debu
             else:
                 sr=i+1
             if (f.type=='SecStr') and (('SecStr' in feature_types) or ('all' in feature_types)):
-                features.append({'style':f.qualifiers['sec_str_type'][0],'seqref':sr,'sel':[f.location.start,f.location.end-1]})   
+                features.append({'style':f.qualifiers['sec_str_type'][0],'seqref':sr,'sel':[f.location.start,f.location.end-1],'position':force_feature_pos if force_feature_pos else 'top'})   
             if f.type=='motif' and (('motif' in feature_types) or ('all' in feature_types)):
                 features.append({'style':'shaderegion','seqref':sr,'sel':[f.location.start,f.location.end-1],'shadcol':f.qualifiers['color']})
             if f.type=='domain' and (('domain' in feature_types) or ('all' in feature_types)):
@@ -61,7 +61,19 @@ def seqfeat2shadefeat(msa,seqref=None,idseqref=True, feature_types=['all'], debu
                         break
                     else:
                         fos[fi]=1
-                features.append({'style':'---','seqref':sr,'sel':[f.location.start,f.location.end-1],'color':'black','text':f.qualifiers['region_name'][0],'position':'b'*overlap+'bottom'})
+                if force_feature_pos=='bottom':
+                    if overlap>2:
+                        overlap=2
+                    features.append({'style':'---','seqref':sr,'sel':[f.location.start,f.location.end-1],'color':'black','text':f.qualifiers['region_name'][0],'position':'b'*(overlap+1)+'bottom'})
+                elif force_feature_pos=='top':
+                    if overlap>2:
+                        overlap=2
+                    features.append({'style':'---','seqref':sr,'sel':[f.location.start,f.location.end-1],'color':'black','text':f.qualifiers['region_name'][0],'position':'t'*(overlap+1)+'top'})
+                else:
+                    if overlap>3:
+                        overlap=3
+                    features.append({'style':'---','seqref':sr,'sel':[f.location.start,f.location.end-1],'color':'black','text':f.qualifiers['region_name'][0],'position':'b'*overlap+'bottom'})
+
             if f.type=='frameblock':
                 features.append({'style':'frameblock','seqref':sr,'sel':[f.location.start,f.location.end-1],'color':f.qualifiers['color']})
             if f.type=='---':

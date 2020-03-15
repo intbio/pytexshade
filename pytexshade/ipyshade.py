@@ -27,17 +27,28 @@ class shadedmsa4plot(object):
        i.e. the upper part has a clean border without any annotations
     """
 
-    def __init__(self, msa,shading_modes=['chemical_functional'],features=[],title='',legend=False, logo=False,hideseqs=False,splitN=20,setends=[],ruler='bottom',show_seq_names=False,show_seq_length=False,funcgroups=None,rotate=False,threshold=[80,50],resperline=0,margins=None, density=150,debug=False,startnumber=1):
+    def __init__(self, msa,annotation='bottom',shading_modes=['chemical_functional'],features=[],title='',legend=False, logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=False,show_seq_length=False,funcgroups=None,rotate=False,threshold=[80,50],resperline=0,margins=None, density=150,debug=False,startnumber=1):
         temp = tempfile.NamedTemporaryFile(suffix='.png')
-        #we'll need to switch all positions of features to bottom forcibly
+        #we'll need to switch all positions of features to bottom or top forcibly
         fn=features.copy()
-        
-        for f in fn:
-            if f.get('position',False):
-                if f['position'][-7:-1]!='bottom':
+        if annotation=='bottom':
+            ruler='bottom'
+        if annotation=='top':
+            ruler='top'
+        if annotation=='top':
+            for f in fn:
+                if f.get('position',False):
+                    if f['position'][-4:-1]!='top':
+                        f['position']='top'
+                else:
                     f['position']='bottom'
-            else:
-                f['position']='bottom'
+        else:
+            for f in fn:
+                if f.get('position',False):
+                    if f['position'][-7:-1]!='bottom':
+                        f['position']='bottom'
+                else:
+                    f['position']='bottom'
         
         if(debug):
             print("tempfile created: ",temp.name)
@@ -46,6 +57,7 @@ class shadedmsa4plot(object):
 
     def _repr_png_(self):
         return self.img
+    
 
     
     
@@ -56,7 +68,7 @@ class shadepdbquick(object):
     site which is claulated using DSSP)
     """
 
-    def __init__(self, pdb_chain_id='1KX5_A',entrez_email='info@example.com',feature_types=['all'],shading_modes=['charge_functional'],title='',legend=True, logo=False,hideseqs=False,splitN=20,setends=[],ruler=True,show_seq_names=True,show_seq_length=True,funcgroups=None,rotate=False,threshold=[80,50],resperline=0,margins=None, density=150,debug=False,startnumber=1):
+    def __init__(self, pdb_chain_id='1KX5_A',entrez_email='info@example.com',feature_types=['all'],force_feature_pos=None,shading_modes=['charge_functional'],title='',legend=True, logo=False,hideseqs=False,splitN=20,setends=[],ruler=True,show_seq_names=True,show_seq_length=True,funcgroups=None,rotate=False,threshold=[80,50],resperline=0,margins=None, density=150,debug=False,startnumber=1):
         temp = tempfile.NamedTemporaryFile(suffix='.png')
         
         #Let's get squence an features
@@ -66,7 +78,7 @@ class shadepdbquick(object):
         msar=MultipleSeqAlignment([record])
         msar[0].id='PDB_'+pdb_chain_id
 
-        fn=shade.seqfeat2shadefeat(msar,debug=debug,feature_types=feature_types)
+        fn=shade.seqfeat2shadefeat(msar,debug=debug,feature_types=feature_types,force_feature_pos=force_feature_pos)
         if(debug):
             print("tempfile created: ",temp.name)
         shade.shade_aln2png(msar, filename=temp.name,shading_modes=shading_modes, features=fn,title=title,legend=legend, logo=logo,hideseqs=hideseqs,splitN=splitN,setends=setends,ruler=ruler,show_seq_names=show_seq_names,show_seq_length=show_seq_length,funcgroups=funcgroups,rotate=rotate,threshold=threshold,resperline=resperline,margins=margins, density=density,debug=debug,startnumber=startnumber)

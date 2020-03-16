@@ -22,6 +22,7 @@ import math
 from Bio.Align import MultipleSeqAlignment
 from Bio import AlignIO
 from io import StringIO
+import subprocess
 
 
 def seqfeat2shadefeat(msa,seqref=None,idseqref=True, feature_types=['all'],force_feature_pos=None, debug=False):
@@ -100,6 +101,20 @@ def shade_aln2png(msa,filename='default',shading_modes=['similar'],features=[],t
         print(cmd)
         os.system(cmd)
         print("Converting PDF to PNG")
+    
+    #cropping in pdf if pdfcrop is installed speeds up a lot!
+    #in ubuntu this is sudo apt-get install texlive-extra-utils
+    if(debug):
+        print("Cropping via PDF crop\n")
+    try:
+        out=subprocess.check_output(['pdfcrop',intf,intf])
+        if(debug):
+            print(out)
+    except:
+        print("WARNING: Likely you do not have pdfcrop installed - this will speed up considerably.\n Please consider installing 'sudo apt-get install texlive-extra-utils' \n")
+
+    
+    
     if rotate:
         if(m):
             cmd='convert -density %d '%density+intf+' -trim -bordercolor White -border %.3f%%x0%% -rotate -90 %s'%(m,filename if filename[-3:]=='png' else filename+'.png')

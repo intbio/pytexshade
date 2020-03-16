@@ -101,15 +101,20 @@ def shade_aln2png(msa,filename='default',shading_modes=['similar'],features=[],t
         os.system(cmd)
         print("Converting PDF to PNG")
     if rotate:
-        cmd='convert -density %d '%density+intf+' -trim -bordercolor White -border %.3f%%x0%% -rotate -90 %s'%(m,filename if filename[-3:]=='png' else filename+'.png')
-        if(debug):
-            print(cmd)
-        os.system(cmd)
+        if(m):
+            cmd='convert -density %d '%density+intf+' -trim -bordercolor White -border %.3f%%x0%% -rotate -90 %s'%(m,filename if filename[-3:]=='png' else filename+'.png')
+        else:
+            cmd='convert -density %d '%density+intf+' -trim -rotate -90 %s'%(filename if filename[-3:]=='png' else filename+'.png')
     else:
-        cmd='convert -density %d '%density+intf+' -trim -bordercolor White -border %.3f%%x0%% %s'%(m,filename if filename[-3:]=='png' else filename+'.png')
-        if(debug):
-            print(cmd)
-        os.system(cmd)
+        if(m):
+            cmd='convert -density %d '%density+intf+' -trim -bordercolor White -border %.3f%%x0%% %s'%(m,filename if filename[-3:]=='png' else filename+'.png')
+        else:
+            cmd='convert -density %d '%density+intf+' -trim %s'%(filename if filename[-3:]=='png' else filename+'.png')
+
+
+    if(debug):
+        print(cmd)
+    os.system(cmd)
     os.remove(intf)
 
 

@@ -113,8 +113,6 @@ def shade_aln2png(msa,filename='default',shading_modes=['similar'],features=[],t
     except:
         print("WARNING: Likely you do not have pdfcrop installed - this will speed up considerably.\n Please consider installing 'sudo apt-get install texlive-extra-utils' \n")
 
-    
-    
     if rotate:
         if(m):
             cmd='convert -density %d '%density+intf+' -trim -bordercolor White -border %.3f%%x0%% -rotate -90 %s'%(m,filename if filename[-3:]=='png' else filename+'.png')

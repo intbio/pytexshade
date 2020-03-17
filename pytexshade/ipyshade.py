@@ -62,7 +62,7 @@ class shadedmsa4plot(object):
     
     
 class shadepdbquick(object):
-    """Class for quickly shading a PDB chain with feature info obtained via genbank
+    """Class for quickly shading a PDB chain with feature info obtained via genbank (this would be the SEQREC record from PDB)
     (note, we do not currenlty know were the secondary structure info in genbank comes from
     it is not from PDB file records, it is similar but not exactly the same as information in ss.txt on the PDB web
     site which is claulated using DSSP)
@@ -77,7 +77,8 @@ class shadepdbquick(object):
         record = SeqIO.read(handle, "genbank")
         msar=MultipleSeqAlignment([record])
         msar[0].id='PDB_'+pdb_chain_id
-
+        self.seqrec=record
+        
         fn=shade.seqfeat2shadefeat(msar,debug=debug,feature_types=feature_types,force_feature_pos=force_feature_pos)
         if(debug):
             print("tempfile created: ",temp.name)

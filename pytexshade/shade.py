@@ -343,6 +343,10 @@ def write_texshade(file_handle,aln_fname,features,res_per_line=120,showlegend=Tr
                 file_handle.write("""
     \\showruler{top}{%s}
     """%numbering_seq)
+  #      else:
+  #          file_handle.write("""
+  # \\hideruler
+  #  """)
         if(hide_ns):
             file_handle.write("""
     \\hideseq{%s}

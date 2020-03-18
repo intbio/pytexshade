@@ -27,25 +27,28 @@ class shadedmsa4plot(object):
        i.e. the upper part has a clean border without any annotations
     """
 
-    def __init__(self, msa,annotation='bottom',shading_modes=['chemical_functional'],features=[],title='',legend=False, logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=False,show_seq_length=False,funcgroups=None,rotate=False,threshold=[80,50],resperline=0,margins=None, density=150,debug=False,startnumber=1):
+    def __init__(self, msa,annotation='bottom',shading_modes=['chemical_functional'],features=[],title='',legend=False, logo=False,hideseqs=False,splitN=20,setends=[],ruler=None,show_seq_names=False,show_seq_length=False,funcgroups=None,rotate=False,threshold=[80,50],resperline=0,margins=None, density=150,debug=False,startnumber=1):
         temp = tempfile.NamedTemporaryFile(suffix='.png')
         #we'll need to switch all positions of features to bottom or top forcibly
         fn=features.copy()
-        if annotation=='bottom':
-            ruler='bottom'
-        if annotation=='top':
-            ruler='top'
+        if ruler is None:
+            if annotation=='bottom':
+                ruler='bottom'
+            if annotation=='top':
+                ruler='top'
         if annotation=='top':
             for f in fn:
                 if f.get('position',False):
-                    if f['position'][-4:-1]!='top':
+                    if f['position'][-3:]!='top':
                         f['position']='top'
                 else:
                     f['position']='bottom'
         else:
             for f in fn:
                 if f.get('position',False):
-                    if f['position'][-7:-1]!='bottom':
+                    if f['position'][-6:]!='bottom':
+                        if debug:
+                            print('Setting position to bottom, initial position is %s'%f['position'])
                         f['position']='bottom'
                 else:
                     f['position']='bottom'

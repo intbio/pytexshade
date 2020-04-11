@@ -159,12 +159,15 @@ resperline - number of residues per line, if 0 - then equal to the length of the
     if(debug):
         print("Created temporaty directory: ", TEMP_DIR)
 
-    ns='consensus'
+    numb_seq='consensus'
     hideseqs_by_name=[]
     if(len(msa)==1):
         msa=msa[:]
         msa.extend([SeqRecord(msa[0].seq,id='dum',name='dum')])
         hideseqs_by_name.append('dum')
+        numb_seq='1'
+    if(startnumber!=1):
+        numb_seq='1' #this will sacrifice possibility to work with gapped seqs, but otherwise it is even more buggy.
     #####if we are splitting the alignment into blocks - get number of blocks
 
     a_len=len(msa)
@@ -253,14 +256,18 @@ resperline - number of residues per line, if 0 - then equal to the length of the
         for s,ns in zip(msa[(i*splitN):((i+1)*splitN)],range((i*splitN),((i+1)*splitN))):
             features_code+=features_dict.get(s.id,'')
             features_code+=features_dict.get(str(ns+1),'')
-        write_texshade(a,os.path.join(TEMP_DIR,'alignment%d.fasta'%i) , features_code, res_per_line,False,shading_modes,logo,hideseqs,setends,ruler,numbering_seq='consensus',hide_ns=False,show_seq_names=show_seq_names,show_seq_length=show_seq_length,hideseqs_by_name=hideseqs_by_name,funcgroups=funcgroups,threshold=threshold,startnumber=startnumber)
+        if(debug):
+            print('Features code:',features_code)
+        write_texshade(a,os.path.join(TEMP_DIR,'alignment%d.fasta'%i) , features_code, res_per_line,False,shading_modes,logo,hideseqs,setends,ruler,numbering_seq=numb_seq,hide_ns=False,show_seq_names=show_seq_names,show_seq_length=show_seq_length,hideseqs_by_name=hideseqs_by_name,funcgroups=funcgroups,threshold=threshold,startnumber=startnumber)
     
     i=num-1
     features_code=features_dict.get('consensus','')
+    if(debug):
+        print('Features code:',features_code)
     for s,ns in zip(msa[(i*splitN):((i+1)*splitN)],range((i*splitN),((i+1)*splitN))):
         features_code+=features_dict.get(s.id,'')
         features_code+=features_dict.get(str(ns+1),'')
-    write_texshade(a,os.path.join(TEMP_DIR,'alignment%d.fasta'%(num-1)) , features_code, res_per_line,legend,shading_modes,logo,hideseqs,setends,ruler,numbering_seq='consensus',hide_ns=False,show_seq_names=show_seq_names,show_seq_length=show_seq_length,hideseqs_by_name=hideseqs_by_name,funcgroups=funcgroups,threshold=threshold,startnumber=startnumber)
+    write_texshade(a,os.path.join(TEMP_DIR,'alignment%d.fasta'%(num-1)) , features_code, res_per_line,legend,shading_modes,logo,hideseqs,setends,ruler,numbering_seq=numb_seq,hide_ns=False,show_seq_names=show_seq_names,show_seq_length=show_seq_length,hideseqs_by_name=hideseqs_by_name,funcgroups=funcgroups,threshold=threshold,startnumber=startnumber)
 
     a.write(r"""
 \end{document} """)
@@ -292,17 +299,19 @@ resperline - number of residues per line, if 0 - then equal to the length of the
 
 
 def write_texshade(file_handle,aln_fname,features,res_per_line=120,showlegend=True,shading_modes=['similar'],logo=False,hideseqs=False,setends=[],ruler=False,numbering_seq='consensus',hide_ns=False,show_seq_names=True,show_seq_length=True,hideseqs_by_name=[],funcgroups=None,threshold=[80,50],startnumber=1):
-    if((not setends) and (startnumber!=1)):
-        raise Exception("With startnumber not equal 1, pls, define setends manually!")
-    if(setends and (startnumber!=1)):
-        startnumber=startnumber+1 #There is some bug in TexShade currently, I think.
+    if(startnumber!=1):
+        print('Startnumber!=1 - is buggy currently - use at your own risk')
+#     if((not setends) and (startnumber!=1)):
+#         raise Exception("With startnumber not equal 1, pls, define setends manually!")
+#     if(setends and (startnumber!=1)):
+#         startnumber=startnumber+1 #There is some bug in TexShade currently, I think.
         
     for shading in shading_modes:
         shading=str(shading)
         file_handle.write("""
     \\begin{texshade}{%s}
     \\residuesperline*{%d}
-  %% \\allowzero
+    \\allowzero
     """%(aln_fname.split('/')[-1],res_per_line)) # we expect that tex file will be in the same dir as alignment files!!! hense split('/')
        
 
@@ -311,11 +320,17 @@ def write_texshade(file_handle,aln_fname,features,res_per_line=120,showlegend=Tr
     \seqtype{P}
     \defconsensus{{}}{*}{upper}
     """)
+        
+        file_handle.write("""
+    \\startnumber{%s}{%d}
+    """%(numbering_seq,startnumber))
+        
         #a very dirty hack
         if(setends):
             file_handle.write("""
-     \\setends[%d]{%s}{%d..%d}
-     """%(startnumber,numbering_seq,setends[0],setends[1]))
+            
+     \\setends{%s}{%d..%d}
+     """%(numbering_seq,setends[0],setends[1]))
                     
             
 # I have no ideas why whas that needed . @molsim 22 Jan 2020            
@@ -329,10 +344,8 @@ def write_texshade(file_handle,aln_fname,features,res_per_line=120,showlegend=Tr
 #     """%(startnumber,numbering_seq,setends[0],setends[1]))
                     
                     
-        else:
-            file_handle.write("""
-    \\startnumber{%s}{%d}
-    """%(numbering_seq,startnumber))
+        
+
            
         if(ruler):
             if(ruler=='bottom'):
@@ -428,7 +441,6 @@ def write_texshade(file_handle,aln_fname,features,res_per_line=120,showlegend=Tr
     """%s)
 
         file_handle.write(r"""
-
     %\setends{consensus}{1..160}
     %\setends{consensus}{1..160}
 

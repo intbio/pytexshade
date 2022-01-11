@@ -76,19 +76,22 @@ def seqfeat2shadefeat(msa,seqref=None,idseqref=True, feature_types=['all'],force
                     features.append({'style':'---','seqref':sr,'sel':[f.location.start,f.location.end-1],'color':'black','text':f.qualifiers['region_name'][0],'position':'b'*overlap+'bottom'})
 
             if f.type=='frameblock':
-                features.append({'style':'frameblock','seqref':sr,'sel':[f.location.start,f.location.end-1],'color':f.qualifiers['color']})
+                features.append({'style':'frameblock','seqref':sr,'sel':[f.location.start,f.location.end-1],'color':f.qualifiers.get('color','red')})
             if f.type=='---':
                 features.append({'style':'---','seqref':sr,'sel':[f.location.start,f.location.end-1],'color':f.qualifiers['color'],'text':f.qualifiers['text']})
+                #Add hoc to use with histones features
+         #   if f.type=='helix':
+        #        features.append({'style':'helix','seqref':sr,'sel':[f.location.start,f.location.end-1]})
 
     return features
 
-def shade_aln2png(msa,filename='default',shading_modes=['similar'],features=[],title='',legend=True, logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=True,show_seq_length=True,funcgroups=None,rotate=False,threshold=[80,50],resperline=0,margins=None, density=150,debug=False,startnumber=1):
+def shade_aln2png(msa,filename='default',shading_modes=['similar'],features=[],title='',legend=True, logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=True,show_seq_length=True,funcgroups=None,rotate=False,threshold=[80,50],resperline=0,margins=None, density=150,debug=False,startnumber=1,allowzero=False):
     td=tempfile.TemporaryDirectory()
     TEMP_DIR=td.name
     if(debug):
         print("Created temporaty directory: ", TEMP_DIR)
     intf=os.path.join(TEMP_DIR,'tempshade.pdf')
-    shade_aln2pdf(msa,intf,shading_modes,features,title,legend, logo,hideseqs,splitN,setends,ruler,show_seq_names,show_seq_length,funcgroups,threshold,resperline=resperline,debug=debug,startnumber=startnumber)
+    shade_aln2pdf(msa,intf,shading_modes,features,title,legend, logo,hideseqs,splitN,setends,ruler,show_seq_names,show_seq_length,funcgroups,threshold,resperline=resperline,debug=debug,startnumber=startnumber,allowzero=allowzero)
     #let's use imagemagic
     #margins - add on each side margins %
     if margins:
@@ -129,9 +132,13 @@ def shade_aln2png(msa,filename='default',shading_modes=['similar'],features=[],t
         print(cmd)
     os.system(cmd)
     os.remove(intf)
+    
+    if(debug):
+        cmd2="cp %s debug/tempshade.png"%(filename if filename[-3:]=='png' else filename+'.png')
+        os.system(cmd2)
 
 
-def shade_aln2pdf(msa,filename='default',shading_modes=['similar'],features=[],title='',legend=True, logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=True,show_seq_length=True,funcgroups=None,threshold=[80,50],resperline=0,debug=False,startnumber=1):
+def shade_aln2pdf(msa,filename='default',shading_modes=['similar'],features=[],title='',legend=True, logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=True,show_seq_length=True,funcgroups=None,threshold=[80,50],resperline=0,debug=False,startnumber=1,allowzero=False):
     """
 will convert msa to a shaded pdf.
 shading_modes: similar, ... see write_texshade code
@@ -211,7 +218,7 @@ resperline - number of residues per line, if 0 - then equal to the length of the
     for i in features:
         sr=str(i.get('seqref','consensus')).replace('_','-')
         if(i['style']=='block' or i['style']=='frameblock'):
-            features_dict[sr]=features_dict.get(sr,'')+"\\frameblock{%s}{%d..%d}{%s[%.1fpt]}"%(sr,i['sel'][0]+1,i['sel'][1]+1,i.get('color','Red'),i.get('thickness',1.5))
+            features_dict[sr]=features_dict.get(sr,'')+"\\frameblock{%s}{%d..%d}{%s[%.1fpt]}"%(sr,i['sel'][0]+1,i['sel'][1]+1,i.get('color','Blue'),i.get('thickness',1.5))
         elif(i['style']=='shaderegion' or i['style']=='shadeblock'):
             features_dict[sr]=features_dict.get(sr,'')+"\\%s{%s}{%d..%d}{%s}{%s}"%(i['style'],sr,i['sel'][0]+1,i['sel'][1]+1,i.get('rescol','Black'),i.get('shadcol','Green'))
         else:
@@ -238,8 +245,8 @@ resperline - number of residues per line, if 0 - then equal to the length of the
         if w<len(title)*0.4:
             w=len(title)*0.4
     a.write("""
-\\usepackage[paperwidth=%fin, paperheight=%fin]{geometry}
-        """%(w,h))
+\\usepackage[paperwidth=%fin, paperheight=%fin,margin=3in]{geometry}
+        """%(w+4,h+4))
 
     a.write(r"""
 \usepackage{texshade}
@@ -258,7 +265,7 @@ resperline - number of residues per line, if 0 - then equal to the length of the
             features_code+=features_dict.get(str(ns+1),'')
         if(debug):
             print('Features code:',features_code)
-        write_texshade(a,os.path.join(TEMP_DIR,'alignment%d.fasta'%i) , features_code, res_per_line,False,shading_modes,logo,hideseqs,setends,ruler,numbering_seq=numb_seq,hide_ns=False,show_seq_names=show_seq_names,show_seq_length=show_seq_length,hideseqs_by_name=hideseqs_by_name,funcgroups=funcgroups,threshold=threshold,startnumber=startnumber)
+        write_texshade(a,os.path.join(TEMP_DIR,'alignment%d.fasta'%i) , features_code, res_per_line,False,shading_modes,logo,hideseqs,setends,ruler,numbering_seq=numb_seq,hide_ns=False,show_seq_names=show_seq_names,show_seq_length=show_seq_length,hideseqs_by_name=hideseqs_by_name,funcgroups=funcgroups,threshold=threshold,startnumber=startnumber,allowzero=allowzero)
     
     i=num-1
     features_code=features_dict.get('consensus','')
@@ -267,7 +274,7 @@ resperline - number of residues per line, if 0 - then equal to the length of the
     for s,ns in zip(msa[(i*splitN):((i+1)*splitN)],range((i*splitN),((i+1)*splitN))):
         features_code+=features_dict.get(s.id,'')
         features_code+=features_dict.get(str(ns+1),'')
-    write_texshade(a,os.path.join(TEMP_DIR,'alignment%d.fasta'%(num-1)) , features_code, res_per_line,legend,shading_modes,logo,hideseqs,setends,ruler,numbering_seq=numb_seq,hide_ns=False,show_seq_names=show_seq_names,show_seq_length=show_seq_length,hideseqs_by_name=hideseqs_by_name,funcgroups=funcgroups,threshold=threshold,startnumber=startnumber)
+    write_texshade(a,os.path.join(TEMP_DIR,'alignment%d.fasta'%(num-1)) , features_code, res_per_line,legend,shading_modes,logo,hideseqs,setends,ruler,numbering_seq=numb_seq,hide_ns=False,show_seq_names=show_seq_names,show_seq_length=show_seq_length,hideseqs_by_name=hideseqs_by_name,funcgroups=funcgroups,threshold=threshold,startnumber=startnumber,allowzero=allowzero)
 
     a.write(r"""
 \end{document} """)
@@ -298,7 +305,7 @@ resperline - number of residues per line, if 0 - then equal to the length of the
 
 
 
-def write_texshade(file_handle,aln_fname,features,res_per_line=120,showlegend=True,shading_modes=['similar'],logo=False,hideseqs=False,setends=[],ruler=False,numbering_seq='consensus',hide_ns=False,show_seq_names=True,show_seq_length=True,hideseqs_by_name=[],funcgroups=None,threshold=[80,50],startnumber=1):
+def write_texshade(file_handle,aln_fname,features,res_per_line=120,showlegend=True,shading_modes=['similar'],logo=False,hideseqs=False,setends=[],ruler=False,numbering_seq='consensus',hide_ns=False,show_seq_names=True,show_seq_length=True,hideseqs_by_name=[],funcgroups=None,threshold=[80,50],startnumber=1,allowzero=False):
     if(startnumber!=1):
         print('Startnumber!=1 - is buggy currently - use at your own risk')
 #     if((not setends) and (startnumber!=1)):
@@ -311,10 +318,13 @@ def write_texshade(file_handle,aln_fname,features,res_per_line=120,showlegend=Tr
         file_handle.write("""
     \\begin{texshade}{%s}
     \\residuesperline*{%d}
-    \\allowzero
+  %%\\allowzero
     """%(aln_fname.split('/')[-1],res_per_line)) # we expect that tex file will be in the same dir as alignment files!!! hense split('/')
        
-
+        if(allowzero):
+            file_handle.write(r"""
+    \allowzero
+    """)
 
         file_handle.write(r"""
     \seqtype{P}

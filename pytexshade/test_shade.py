@@ -23,7 +23,7 @@ def test_shade_aln2png_two_seqs():
 	# features=get_hist_ss_in_aln_for_shade(msa,below=True)
 	features=[{'style':'fill:$\\uparrow$','sel':[5,10],'text':'test'}]
 	print(features)
-	shade_aln2png(msa,filename='test_results/2seqs.png',shading_modes=['charge_functional'], legend=False, features=features,title='',logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=False,show_seq_length=False)
+	shade_aln2png(msa,filename='test_results/2seqs.png',shading_modes=['charge_functional'], legend=False, features=features,title='',logo=False,hideseqs=False,splitN=20,setends=[],ruler=False,show_seq_names=False,show_seq_length=False,debug=True)
 	size=os.path.getsize('test_results/2seqs.png')
 	assert size>10000, "output png filesize too small, looks that nothing was produced"
 

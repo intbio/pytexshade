@@ -114,7 +114,7 @@ def test_long_msa():
 	from urllib.request import urlopen 
 	import tempfile
 	temp = tempfile.NamedTemporaryFile()
-	pfam_path="https://pfam.xfam.org/family/PF00125/alignment/seed"
+	pfam_path="http://pfam.xfam.org/family/PF00125/alignment/seed"
 	data = urlopen(pfam_path).read()
 	# print(data)
 	with open(temp.name,'wb') as f:

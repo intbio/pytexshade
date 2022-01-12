@@ -77,7 +77,7 @@ brew install gs
 
 ## For developers 
 
-- Testing can be done as
+- Testing can be done as 
 ```
 git clone https://github.com/intbio/pytexshade.git
 docker run   --workdir "/wd" -v "$PWD/pytexshade:/wd" intbio/pytexshade_test pytest
